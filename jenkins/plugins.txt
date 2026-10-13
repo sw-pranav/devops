@@ -1,5 +1,0 @@
-workflow-aggregator
-git
-pipeline-stage-view
-docker-workflow
-prometheus
