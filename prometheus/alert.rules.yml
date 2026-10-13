@@ -1,0 +1,36 @@
+groups:
+  - name: demo-app
+    rules:
+      - alert: AppDown
+        expr: up{job="demo-app"} == 0
+        for: 1m
+        labels: { severity: critical }
+        annotations:
+          summary: "demo-app is down"
+
+      - alert: HighErrorRate
+        expr: |
+          sum(rate(app_requests_total{status=~"5.."}[5m]))
+            / sum(rate(app_requests_total[5m])) > 0.05
+        for: 2m
+        labels: { severity: warning }
+        annotations:
+          summary: "demo-app 5xx rate above 5%"
+
+      - alert: HighLatencyP95
+        expr: |
+          histogram_quantile(0.95,
+            sum by (le) (rate(app_request_duration_seconds_bucket[5m]))) > 1
+        for: 5m
+        labels: { severity: warning }
+        annotations:
+          summary: "demo-app p95 latency above 1s"
+
+  - name: host
+    rules:
+      - alert: HighCpu
+        expr: 100 - (avg(rate(node_cpu_seconds_total{mode="idle"}[5m])) * 100) > 85
+        for: 5m
+        labels: { severity: warning }
+        annotations:
+          summary: "Host CPU above 85%"
